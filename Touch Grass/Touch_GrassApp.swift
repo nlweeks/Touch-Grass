@@ -11,14 +11,16 @@ import SwiftUI
 struct Touch_GrassApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     
-    @State private var appController = AppController()
+    @State private var appController: AppController? = nil
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(appController)
-                .onAppear {
-                    appController.listenToAuthChanges()
+                .environment(appController ?? AppController())
+                .task {
+                    if appController == nil {
+                        appController = AppController()
+                    }
                 }
         }
     }

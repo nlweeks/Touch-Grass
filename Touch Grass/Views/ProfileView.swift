@@ -12,7 +12,7 @@ struct ProfileView: View {
     
     var body: some View {
         VStack {
-            Text("Hello, ProfileView!")
+            Text("Hello, \(appController.currentUserProfile?.email ?? "World")!")
             
             Button("Logout") {
                 do {
