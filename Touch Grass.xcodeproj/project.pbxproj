@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6577B4F02DB015530053366F /* CodeScraps.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6577B4EF2DB015500053366F /* CodeScraps.swift */; };
 		65C8FB372DA98A8700CB5C94 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 65C8FB362DA98A8700CB5C94 /* FirebaseAnalytics */; };
 		65C8FB392DA98A8700CB5C94 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 65C8FB382DA98A8700CB5C94 /* FirebaseAuth */; };
 		65C8FB3B2DA98A8700CB5C94 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 65C8FB3A2DA98A8700CB5C94 /* FirebaseAuthCombine-Community */; };
@@ -33,6 +34,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6577B4EF2DB015500053366F /* CodeScraps.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScraps.swift; sourceTree = "<group>"; };
 		65C8FB252DA985C300CB5C94 /* Touch Grass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Touch Grass.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		65C8FB552DA9A3D500CB5C94 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		65C8FB562DA9A3D500CB5C94 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				65C8FB672DA9A3FE00CB5C94 /* Views */,
 				65C8FB562DA9A3D500CB5C94 /* Assets.xcassets */,
 				65C8FB592DA9A3D500CB5C94 /* GoogleService-Info.plist */,
+				6577B4EF2DB015500053366F /* CodeScraps.swift */,
 			);
 			path = "Touch Grass";
 			sourceTree = "<group>";
@@ -215,6 +218,7 @@
 				65C8FB712DA9BD6100CB5C94 /* Path.swift in Sources */,
 				65C8FB6D2DA9B1E400CB5C94 /* FirestoreContext.swift in Sources */,
 				65C8FB692DA9A3FE00CB5C94 /* ProfileView.swift in Sources */,
+				6577B4F02DB015530053366F /* CodeScraps.swift in Sources */,
 				65C8FB612DA9A3D500CB5C94 /* Touch_GrassApp.swift in Sources */,
 				65C8FB6B2DA9A40F00CB5C94 /* AppController.swift in Sources */,
 				65C8FB6F2DA9B36A00CB5C94 /* Firestorable.swift in Sources */,
