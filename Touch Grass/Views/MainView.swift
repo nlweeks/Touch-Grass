@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-struct ProfileView: View {
-    @Environment(AppController.self) private var appController
+struct MainView: View {
+    @Environment(AppViewModel.self) private var appViewModel
     
     var body: some View {
         VStack {
-            Text("Hello, \(appController.currentUserProfile?.email ?? "World")!")
+            Text("Hello, \(appViewModel.currentUserProfile?.email ?? "World")!")
             
             Button("Logout") {
                 do {
-                    try appController.signOut()
+                    try appViewModel.signOut()
                 } catch {
                     print(error.localizedDescription)
                 }
@@ -27,5 +27,6 @@ struct ProfileView: View {
 }
 
 #Preview {
-    ProfileView()
+    MainView()
+        .environment(AppViewModel())
 }

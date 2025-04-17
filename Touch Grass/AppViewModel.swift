@@ -14,9 +14,9 @@ enum AuthState {
 }
 
 @Observable
-class AppController {
+class AppViewModel {
     
-    // MARK: - UI Inputs
+    // MARK: - Auth UI Inputs
     var email = ""
     var password = ""
     

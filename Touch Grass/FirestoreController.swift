@@ -10,7 +10,7 @@ import Foundation
 import FirebaseFirestore
 import SwiftUI
 
-struct FirestoreContext<T: Codable & Firestorable & Equatable> {
+struct FirestoreController<T: Codable & Firestorable & Equatable> {
     
     @discardableResult static func create(_ document: T, collectionPath: String) async throws -> T {
         let reference = Firestore.firestore().collection(collectionPath).document()

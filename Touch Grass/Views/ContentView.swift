@@ -8,17 +8,17 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(AppController.self) private var appController
+    @Environment(AppViewModel.self) private var appViewModel
     
     var body: some View {
         Group {
-            switch appController.authState {
+            switch appViewModel.authState {
             case .undefined:
                 ProgressView()
             case .notAuthenticated:
                 AuthView()
             case .authenticated:
-                ProfileView()
+                MainView()
             }
         }
     }
@@ -26,4 +26,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(AppViewModel())
 }

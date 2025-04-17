@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AuthView: View {
-    @Environment(AppController.self) private var appController
+    @Environment(AppViewModel.self) private var appViewModel
     
     @State private var isSignUp = false
     
@@ -16,10 +16,10 @@ struct AuthView: View {
         VStack {
             Spacer()
             
-            TextField("Email", text: Bindable(appController).email)
+            TextField("Email", text: Bindable(appViewModel).email)
                 .textFieldStyle(.roundedBorder)
             
-            SecureField("Password", text: Bindable(appController).password)
+            SecureField("Password", text: Bindable(appViewModel).password)
                 .textFieldStyle(.roundedBorder)
             
             Button {
@@ -33,11 +33,11 @@ struct AuthView: View {
             }
             .buttonStyle(.borderedProminent)
             
-            Button("\(isSignUp ? "I already have an account" : "I don't have an account")") {
+            Button("\(isSignUp ? "I already have an account" : "Create an account")") {
                 isSignUp.toggle()
             }
             .padding(.top)
-
+            
         }
         .padding()
     }
@@ -49,8 +49,8 @@ struct AuthView: View {
     func signUp() {
         Task {
             do {
-                try await appController.signUp()
-                try await appController.createUserProfile()
+                try await appViewModel.signUp()
+                try await appViewModel.createUserProfile()
             } catch {
                 print(error.localizedDescription)
             }
@@ -60,7 +60,7 @@ struct AuthView: View {
     func signIn() {
         Task {
             do {
-                try await appController.signIn()
+                try await appViewModel.signIn()
             } catch {
                 print(error.localizedDescription)
             }
@@ -70,4 +70,5 @@ struct AuthView: View {
 
 #Preview {
     AuthView()
+        .environment(AppViewModel())
 }
