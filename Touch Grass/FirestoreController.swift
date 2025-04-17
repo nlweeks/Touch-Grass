@@ -21,7 +21,12 @@ struct FirestoreController<T: Codable & Firestorable & Equatable> {
     }
     
     @discardableResult static func update(_ document: T, collectionPath: String) throws -> T? {
-        guard let uid = document.uid else { return nil }
+        guard let uid = document.uid else {
+            print("Cannot update document with nil UID")
+            return nil
+        }
+        
+        print("Updating document with UID: \(uid)")
         let reference = Firestore.firestore().collection(collectionPath)
         try reference.document(uid).setData(from: document, merge: true)
         return document

@@ -40,14 +40,14 @@ struct Profile: Codable, Firestorable, Equatable {
 }
 
 extension Profile {
-    enum UserGender: String, Codable {
+    enum UserGender: String, Codable, CaseIterable {
         case male
         case female
         case nonbinary
         case other
     }
     
-    enum EducationLevel: String, Codable {
+    enum EducationLevel: String, Codable, CaseIterable {
         case highSchool = "High School"
         case associates = "Associates"
         case undergraduate = "Undergraduate"

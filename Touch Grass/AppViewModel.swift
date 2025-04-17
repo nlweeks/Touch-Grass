@@ -64,12 +64,18 @@ class AppViewModel {
         // Remove existing listener if any
         removeProfileListener()
         
+        // Add debug logging
+        print("Starting to listen for profile with UID: \(uid)")
+        
         // Set up the new listener using FirestoreController
         profileListener = FirestoreController<Profile>.listen(uid: uid, collectionPath: Path.Firestore.profiles) { [weak self] profile, exists in
             guard let self = self else { return }
             
+            print("Profile listener triggered - exists: \(exists)")
+            
             if exists {
                 if let profile = profile {
+                    print("Retrieved profile with UID: \(profile.uid ?? "nil")")
                     self.currentUserProfile = profile
                     
                     // Determine app state based on profile completeness
@@ -81,6 +87,7 @@ class AppViewModel {
                 }
             } else {
                 // Profile document doesn't exist, create minimal profile and move to onboarding
+                print("No profile found - creating new profile for UID: \(uid)")
                 Task {
                     do {
                         try await self.createUserProfile()
@@ -137,13 +144,24 @@ class AppViewModel {
             return
         }
         
+        print("Creating new profile with UID: \(user.uid)")
         let profile = Profile(uid: user.uid, email: user.email ?? "")
-        _ = try await FirestoreController<Profile>.create(profile, collectionPath: Path.Firestore.profiles)
+        
+        // Execute the creation and capture the result
+        let createdProfile = try await FirestoreController<Profile>.create(profile, collectionPath: Path.Firestore.profiles)
+        
+        // Update the current profile
+        self.currentUserProfile = createdProfile
+        print("Profile created with UID: \(createdProfile.uid ?? "nil")")
     }
     
     func completeOnboarding(updatedProfile: Profile) {
+        print("Completing onboarding with profile: \(updatedProfile)")
+        print("Profile UID: \(updatedProfile.uid ?? "nil")")
+        
         do {
             _ = try FirestoreController<Profile>.update(updatedProfile, collectionPath: Path.Firestore.profiles)
+            print("Profile update completed")
         } catch {
             print("Error updating profile: \(error)")
         }
