@@ -9,22 +9,24 @@ import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 
-enum AuthState {
-    case undefined, authenticated, notAuthenticated
+enum AppState {
+    case onboarding, mainApp
 }
 
 @Observable
 class AppViewModel {
+    // MARK: - Overall App State
+    // Checks if user is logged in
+    var appState: AppState = .onboarding
     
-    // MARK: - Auth UI Inputs
+    // MARK: - AuthView UI Inputs
     var email = ""
     var password = ""
     
-    // MARK: - Firestore Profile
+    // MARK: - Stored User Profile (from Firestore)
     var currentUserProfile: Profile?
     
     // MARK: - Auth Changes + Sync With Firestore Profile
-    var authState: AuthState = .undefined
     private var authStateListenerHandle: AuthStateDidChangeListenerHandle?
     private var profileListener: ListenerRegistration?
     
@@ -40,10 +42,10 @@ class AppViewModel {
     private func listenToAuthChanges() {
         authStateListenerHandle = Auth.auth().addStateDidChangeListener { auth, user in
             if let user = user {
-                self.authState = .authenticated
+                self.appState = .mainApp
                 self.startListeningToUserProfile(uid: user.uid)
             } else {
-                self.authState = .notAuthenticated
+                self.appState = .onboarding
                 self.currentUserProfile = nil
                 self.removeProfileListener()
             }

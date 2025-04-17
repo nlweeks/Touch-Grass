@@ -12,12 +12,10 @@ struct ContentView: View {
     
     var body: some View {
         Group {
-            switch appViewModel.authState {
-            case .undefined:
-                ProgressView()
-            case .notAuthenticated:
+            switch appViewModel.appState {
+            case .onboarding:
                 AuthView()
-            case .authenticated:
+            case .mainApp:
                 MainView()
             }
         }
