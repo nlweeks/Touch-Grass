@@ -13,8 +13,10 @@ struct ContentView: View {
     var body: some View {
         Group {
             switch appViewModel.appState {
-            case .onboarding:
+            case .authentication:
                 AuthView()
+            case .onboarding:
+                OnboardInfoView()
             case .mainApp:
                 MainView()
             }

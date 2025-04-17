@@ -50,7 +50,6 @@ struct AuthView: View {
         Task {
             do {
                 try await appViewModel.signUp()
-                try await appViewModel.createUserProfile()
             } catch {
                 print(error.localizedDescription)
             }

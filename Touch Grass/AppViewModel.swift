@@ -10,14 +10,14 @@ import FirebaseAuth
 import FirebaseFirestore
 
 enum AppState {
-    case onboarding, mainApp
+    case authentication, onboarding, mainApp
 }
 
 @Observable
 class AppViewModel {
     // MARK: - Overall App State
     // Checks if user is logged in
-    var appState: AppState = .onboarding
+    var appState: AppState = .authentication
     
     // MARK: - AuthView UI Inputs
     var email = ""
@@ -42,10 +42,11 @@ class AppViewModel {
     private func listenToAuthChanges() {
         authStateListenerHandle = Auth.auth().addStateDidChangeListener { auth, user in
             if let user = user {
-                self.appState = .mainApp
+                // Start listening to user profile
                 self.startListeningToUserProfile(uid: user.uid)
             } else {
-                self.appState = .onboarding
+                // User is logged out
+                self.appState = .authentication
                 self.currentUserProfile = nil
                 self.removeProfileListener()
             }
@@ -60,35 +61,34 @@ class AppViewModel {
     }
     
     private func startListeningToUserProfile(uid: String) {
-        let db = Firestore.firestore()
-        let docRef = db.collection("profiles").document(uid)
-        
         // Remove existing listener if any
         removeProfileListener()
         
-        // Perform an initial fetch
-        docRef.getDocument { document, error in
-            if let document = document, document.exists {
-                do {
-                    self.currentUserProfile = try document.data(as: Profile.self)
-                } catch {
-                    print("Error decoding profile: \(error)")
+        // Set up the new listener using FirestoreController
+        profileListener = FirestoreController<Profile>.listen(uid: uid, collectionPath: Path.Firestore.profiles) { [weak self] profile, exists in
+            guard let self = self else { return }
+            
+            if exists {
+                if let profile = profile {
+                    self.currentUserProfile = profile
+                    
+                    // Determine app state based on profile completeness
+                    if self.isProfileComplete() {
+                        self.appState = .mainApp
+                    } else {
+                        self.appState = .onboarding
+                    }
                 }
             } else {
-                print("Profile does not exist.")
-            }
-        }
-        
-        // Set up real-time listener
-        profileListener = docRef.addSnapshotListener { documentSnapshot, error in
-            guard let document = documentSnapshot else {
-                print("Error fetching document: \(error!)")
-                return
-            }
-            do {
-                self.currentUserProfile = try document.data(as: Profile.self)
-            } catch {
-                print("Error decoding profile: \(error)")
+                // Profile document doesn't exist, create minimal profile and move to onboarding
+                Task {
+                    do {
+                        try await self.createUserProfile()
+                        self.appState = .onboarding
+                    } catch {
+                        print("Error creating user profile: \(error)")
+                    }
+                }
             }
         }
     }
@@ -96,6 +96,16 @@ class AppViewModel {
     private func removeProfileListener() {
         profileListener?.remove()
         profileListener = nil
+    }
+    
+    // Helper method to determine if a profile has completed onboarding
+    private func isProfileComplete() -> Bool {
+        guard let profile = currentUserProfile else { return false }
+        
+        // Define your criteria for a complete profile here
+        // For example, check if essential fields are filled in
+        return profile.firstName != nil &&
+        profile.lastName != nil
     }
     
     // MARK: - Baseline Firebase Auth Functions
@@ -120,7 +130,7 @@ class AppViewModel {
         }
     }
     
-    // MARK: - Firestore Profile Creation + Fetching
+    // MARK: - Firestore Profile Management
     func createUserProfile() async throws {
         guard let user = Auth.auth().currentUser else {
             print("No user signed in.")
@@ -128,20 +138,28 @@ class AppViewModel {
         }
         
         let profile = Profile(uid: user.uid, email: user.email ?? "")
-        let db = Firestore.firestore()
+        _ = try await FirestoreController<Profile>.create(profile, collectionPath: Path.Firestore.profiles)
+    }
+    
+    func completeOnboarding(updatedProfile: Profile) {
         do {
-            try db.collection("profiles").document(user.uid).setData(from: profile)
+            _ = try FirestoreController<Profile>.update(updatedProfile, collectionPath: Path.Firestore.profiles)
         } catch {
-            print("Error writing profile to Firestore: \(error)")
+            print("Error updating profile: \(error)")
         }
     }
     
-    func deleteUserProfile(uid: String) {
-        let db = Firestore.firestore()
-        db.collection("profiles").document(uid).delete()
+    func deleteUserProfile() {
+        guard let profile = currentUserProfile else { return }
+        
+        do {
+            _ = try FirestoreController<Profile>.delete(profile, collectionPath: Path.Firestore.profiles)
+        } catch {
+            print("Error deleting profile: \(error)")
+        }
     }
     
-    // MARK: - Firestore Auth Info Changes
+    // MARK: - Firebase Auth Info Changes
     func updateUserProfile() {
         let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
         changeRequest?.displayName = "Amber"

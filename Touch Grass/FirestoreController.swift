@@ -41,6 +41,36 @@ struct FirestoreController<T: Codable & Firestorable & Equatable> {
         return document
     }
     
+    static func listen(uid: String, collectionPath: String, onUpdate: @escaping (T?, Bool) -> Void) -> ListenerRegistration {
+        let reference = Firestore.firestore().collection(collectionPath).document(uid)
+        return reference.addSnapshotListener { documentSnapshot, error in
+            if let error = error {
+                print("Error fetching document: \(error)")
+                onUpdate(nil, false)
+                return
+            }
+            
+            guard let document = documentSnapshot else {
+                onUpdate(nil, false)
+                return
+            }
+            
+            // Check if the document exists
+            if document.exists {
+                do {
+                    let data = try document.data(as: T.self)
+                    onUpdate(data, true)
+                } catch {
+                    print("Error decoding document: \(error)")
+                    onUpdate(nil, true)
+                }
+            } else {
+                // Document doesn't exist
+                onUpdate(nil, false)
+            }
+        }
+    }
+    
     static func query(collectionPath: String, predicates: [QueryPredicate]) async throws -> [T] {
         let query: Query = getQuery(path: collectionPath, predicates: predicates)
         let snapshot = try await query.getDocuments()
