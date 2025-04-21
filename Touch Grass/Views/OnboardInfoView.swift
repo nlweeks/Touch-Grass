@@ -10,34 +10,41 @@ import SwiftUI
 struct OnboardInfoView: View {
     @Environment(AppViewModel.self) private var appViewModel
     @State private var inputPage: InputPage = .one
-    @State private var updatedProfile: Profile
+    @State private var updatedProfile: Profile?
     @State private var showingValidationAlert = false
     @State private var validationMessage = ""
-    
-    init() {
-        // Initialize with a placeholder, then update in onAppear
-        _updatedProfile = State(initialValue: Profile(email: ""))
-    }
     
     var body: some View {
         VStack {
             if let profile = updatedProfile {
                 TabView(selection: $inputPage) {
                     // Basic Info
-                    PersonalInfoPage(profile: $updatedProfile)
-                        .tag(InputPage.one)
+                    PersonalInfoPage(profile: Binding(
+                        get: { profile },
+                        set: { updatedProfile = $0 }
+                    ))
+                    .tag(InputPage.one)
                     
                     // Location
-                    LocationPage(profile: $updatedProfile)
-                        .tag(InputPage.two)
+                    LocationPage(profile: Binding(
+                        get: { profile },
+                        set: { updatedProfile = $0 }
+                    ))
+                    .tag(InputPage.two)
                     
                     // Education & Work
-                    EducationAndWorkPage(profile: $updatedProfile)
-                        .tag(InputPage.three)
+                    EducationAndWorkPage(profile: Binding(
+                        get: { profile },
+                        set: { updatedProfile = $0 }
+                    ))
+                    .tag(InputPage.three)
                     
                     // Hobbies & Preferences
-                    HobbiesPage(profile: $updatedProfile)
-                        .tag(InputPage.four)
+                    HobbiesPage(profile: Binding(
+                        get: { profile },
+                        set: { updatedProfile = $0 }
+                    ))
+                    .tag(InputPage.four)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .always))
                 .animation(.easeInOut, value: inputPage)
@@ -60,13 +67,19 @@ struct OnboardInfoView: View {
                         if validateCurrentPage() {
                             withAnimation {
                                 if inputPage.isLast {
-                                    // Ensure the UID is preserved from the original profile
-                                    if updatedProfile.uid == nil {
-                                        updatedProfile.uid = appViewModel.currentUserProfile?.uid
+                                    // Preserve the UID from the current profile
+                                    var finalProfile = profile
+                                    
+                                    // Critical: Make sure we have the UID
+                                    if finalProfile.uid == nil, let currentUID = appViewModel.currentUserProfile?.uid {
+                                        print("Restoring missing UID: \(currentUID)")
+                                        finalProfile.uid = currentUID
                                     }
                                     
-                                    // Save the updated profile and transition to main app
-                                    appViewModel.completeOnboarding(updatedProfile: updatedProfile)
+                                    print("Saving final profile with UID: \(finalProfile.uid ?? "still nil")")
+                                    
+                                    // Save the updated profile
+                                    appViewModel.completeOnboarding(updatedProfile: finalProfile)
                                 } else if let nextPage = inputPage.next {
                                     inputPage = nextPage
                                 }
@@ -78,14 +91,18 @@ struct OnboardInfoView: View {
                     .buttonStyle(.borderedProminent)
                 }
                 .padding()
+            } else {
+                ProgressView("Loading profile...")
             }
         }
         .onAppear {
-            // Make sure we're using the correct profile from the environment
+            // Initialize with the current user profile
             if let currentProfile = appViewModel.currentUserProfile {
+                print("OnboardInfoView setting profile with UID: \(currentProfile.uid ?? "nil")")
                 updatedProfile = currentProfile
+            } else {
+                print("WARNING: No current profile available in OnboardInfoView")
             }
-            print("OnboardInfoView appeared with profile UID: \(updatedProfile.uid ?? "nil")")
         }
         .alert("Please Fill Required Fields", isPresented: $showingValidationAlert) {
             Button("OK", role: .cancel) { }
@@ -96,20 +113,25 @@ struct OnboardInfoView: View {
     
     // Validation logic with more detailed feedback
     func validateCurrentPage() -> Bool {
+        guard let profile = updatedProfile else {
+            validationMessage = "Profile data is missing."
+            return false
+        }
+        
         switch inputPage {
         case .one:
-            if updatedProfile.firstName?.isEmpty ?? true {
+            if profile.firstName?.isEmpty ?? true {
                 validationMessage = "Please enter your first name."
                 return false
             }
-            if updatedProfile.lastName?.isEmpty ?? true {
+            if profile.lastName?.isEmpty ?? true {
                 validationMessage = "Please enter your last name."
                 return false
             }
             return true
             
         case .two:
-            if updatedProfile.chosenLocation?.isEmpty ?? true {
+            if profile.chosenLocation?.isEmpty ?? true {
                 validationMessage = "Please select a location."
                 return false
             }
@@ -117,14 +139,14 @@ struct OnboardInfoView: View {
             
         case .three:
             // Make education level required but not college/job
-            if updatedProfile.educationLevel == nil {
+            if profile.educationLevel == nil {
                 validationMessage = "Please select your education level."
                 return false
             }
             return true
             
         case .four:
-            if updatedProfile.hobbies?.isEmpty ?? true {
+            if profile.hobbies?.isEmpty ?? true {
                 validationMessage = "Please select at least one hobby."
                 return false
             }

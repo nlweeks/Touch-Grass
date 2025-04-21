@@ -22,14 +22,20 @@ struct FirestoreController<T: Codable & Firestorable & Equatable> {
     
     @discardableResult static func update(_ document: T, collectionPath: String) throws -> T? {
         guard let uid = document.uid else {
-            print("Cannot update document with nil UID")
+            print("CRITICAL ERROR: Cannot update document with nil UID")
             return nil
         }
         
-        print("Updating document with UID: \(uid)")
+        print("Updating document in \(collectionPath) with UID: \(uid)")
         let reference = Firestore.firestore().collection(collectionPath)
-        try reference.document(uid).setData(from: document, merge: true)
-        return document
+        
+        // Create a copy to ensure the @DocumentID property is handled correctly
+        var mutableDocument = document
+        mutableDocument.uid = uid
+        
+        try reference.document(uid).setData(from: mutableDocument, merge: true)
+        print("Document successfully updated")
+        return mutableDocument
     }
     
     @discardableResult static func read(_ uid: String, collectionPath: String) async throws -> T? {

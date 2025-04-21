@@ -156,12 +156,27 @@ class AppViewModel {
     }
     
     func completeOnboarding(updatedProfile: Profile) {
-        print("Completing onboarding with profile: \(updatedProfile)")
-        print("Profile UID: \(updatedProfile.uid ?? "nil")")
+        // Critical check: Ensure we have a UID
+        var profileToSave = updatedProfile
+        
+        if profileToSave.uid == nil {
+            if let currentUserID = Auth.auth().currentUser?.uid {
+                print("Setting missing UID from Auth: \(currentUserID)")
+                profileToSave.uid = currentUserID
+            } else {
+                print("ERROR: Cannot complete onboarding - no UID available!")
+                return
+            }
+        }
+        
+        print("Completing onboarding with profile UID: \(profileToSave.uid ?? "nil")")
         
         do {
-            _ = try FirestoreController<Profile>.update(updatedProfile, collectionPath: Path.Firestore.profiles)
-            print("Profile update completed")
+            _ = try FirestoreController<Profile>.update(profileToSave, collectionPath: Path.Firestore.profiles)
+            print("Profile successfully updated")
+            
+            // Update the current profile in memory too
+            self.currentUserProfile = profileToSave
         } catch {
             print("Error updating profile: \(error)")
         }
