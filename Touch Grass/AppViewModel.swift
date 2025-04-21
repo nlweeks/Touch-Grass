@@ -64,10 +64,11 @@ class AppViewModel {
         // Remove existing listener if any
         removeProfileListener()
         
-        // Add debug logging
         print("Starting to listen for profile with UID: \(uid)")
         
-        // Set up the new listener using FirestoreController
+        // Track creation attempts to prevent duplicates
+        var creationInProgress = false
+        
         profileListener = FirestoreController<Profile>.listen(uid: uid, collectionPath: Path.Firestore.profiles) { [weak self] profile, exists in
             guard let self = self else { return }
             
@@ -85,15 +86,19 @@ class AppViewModel {
                         self.appState = .onboarding
                     }
                 }
-            } else {
-                // Profile document doesn't exist, create minimal profile and move to onboarding
+            } else if !creationInProgress {
+                // Prevent duplicate creation
+                creationInProgress = true
+                
                 print("No profile found - creating new profile for UID: \(uid)")
                 Task {
                     do {
                         try await self.createUserProfile()
                         self.appState = .onboarding
+                        creationInProgress = false
                     } catch {
                         print("Error creating user profile: \(error)")
+                        creationInProgress = false
                     }
                 }
             }
@@ -145,14 +150,19 @@ class AppViewModel {
         }
         
         print("Creating new profile with UID: \(user.uid)")
+        
+        // Create a profile with the Auth UID
         let profile = Profile(uid: user.uid, email: user.email ?? "")
         
-        // Execute the creation and capture the result
-        let createdProfile = try await FirestoreController<Profile>.create(profile, collectionPath: Path.Firestore.profiles)
-        
-        // Update the current profile
-        self.currentUserProfile = createdProfile
-        print("Profile created with UID: \(createdProfile.uid ?? "nil")")
+        do {
+            // Create the document with the Auth UID as the document ID
+            let createdProfile = try await FirestoreController<Profile>.create(profile, collectionPath: Path.Firestore.profiles)
+            self.currentUserProfile = createdProfile
+            print("Profile created with UID: \(createdProfile.uid ?? "nil")")
+        } catch {
+            print("Error creating profile: \(error.localizedDescription)")
+            throw error
+        }
     }
     
     func completeOnboarding(updatedProfile: Profile) {

@@ -13,9 +13,15 @@ import SwiftUI
 struct FirestoreController<T: Codable & Firestorable & Equatable> {
     
     @discardableResult static func create(_ document: T, collectionPath: String) async throws -> T {
-        let reference = Firestore.firestore().collection(collectionPath).document()
+        // If the document has a UID, use it as the document ID
+        let documentId = document.uid
+        let reference = documentId != nil
+            ? Firestore.firestore().collection(collectionPath).document(documentId!)
+            : Firestore.firestore().collection(collectionPath).document()
+        
         var updatedDocument = document
         updatedDocument.uid = reference.documentID
+        
         try reference.setData(from: updatedDocument)
         return updatedDocument
     }
