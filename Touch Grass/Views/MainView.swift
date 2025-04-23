@@ -7,26 +7,36 @@
 
 import SwiftUI
 
+enum CurrentView {
+    case home, search, profile
+}
+
 struct MainView: View {
-    @Environment(AppViewModel.self) private var appViewModel
+//    @Environment(AppViewModel.self) private var appViewModel
     
     var body: some View {
-        VStack {
-            Text("Hello, \(appViewModel.currentUserProfile?.email ?? "World")!")
-            
-            Button("Logout") {
-                do {
-                    try appViewModel.signOut()
-                } catch {
-                    print(error.localizedDescription)
+        TabView {
+            HomeView()
+                .tabItem {
+                    Image(systemName: "house")
                 }
-            }
+                .tag(CurrentView.home)
+            
+            Text("Search")
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                }
+                .tag(CurrentView.search)
+            
+            Text("John Doe")
+                .tabItem {
+                    Image(systemName: "person.circle")
+                }
+                .tag(CurrentView.profile)
         }
-        
     }
 }
 
 #Preview {
     MainView()
-        .environment(AppViewModel())
 }

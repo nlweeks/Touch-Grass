@@ -212,48 +212,4 @@ class AppViewModel {
             }
         }
     }
-    
-    //    func setUserEmail() {
-    //        Auth.auth().currentUser?.updateEmail(to: "amber@example.com") { err in
-    //            if let err {
-    //                print(err.localizedDescription)
-    //            }
-    //        }
-    //    }
-    //
-    //    func reAuthenticate() {
-    //        let user = Auth.auth().currentUser
-    //        let credential = EmailAuthProvider.credential(withEmail: email, link: password)
-    //
-    //        user?.reauthenticate(with: credential) { result, err in
-    //            if let err {
-    //                print(err.localizedDescription)
-    //            }
-    //            print(result)
-    //        }
-    //    }
-    //
-    //    func sendUserEmailVerification() {
-    //        Auth.auth().currentUser?.sendEmailVerification() { err in
-    //            if let err {
-    //                print(err.localizedDescription)
-    //            }
-    //        }
-    //    }
-    //
-    //    func setUserPassword() {
-    //        Auth.auth().currentUser?.updatePassword(to: password) { err in
-    //            if let err {
-    //                print(err.localizedDescription)
-    //            }
-    //        }
-    //    }
-    //
-    //    func sendPasswordResetEmail() {
-    //        Auth.auth().sendPasswordReset(withEmail: "amber@example.com") { err in
-    //            if let err {
-    //                print(err.localizedDescription)
-    //            }
-    //        }
-    //    }
 }
