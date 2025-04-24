@@ -7,32 +7,34 @@
 
 import SwiftUI
 
-enum CurrentView {
+enum Tabs {
     case home, search, profile
 }
 
 struct MainView: View {
 //    @Environment(AppViewModel.self) private var appViewModel
     
+    @State private var currentTab: Tabs = .search
+    
     var body: some View {
-        TabView {
+        TabView(selection: $currentTab) {
             HomeView()
                 .tabItem {
                     Image(systemName: "house")
                 }
-                .tag(CurrentView.home)
+                .tag(Tabs.home)
             
-            Text("Search")
+            SearchView()
                 .tabItem {
                     Image(systemName: "magnifyingglass")
                 }
-                .tag(CurrentView.search)
+                .tag(Tabs.search)
             
             Text("John Doe")
                 .tabItem {
                     Image(systemName: "person.circle")
                 }
-                .tag(CurrentView.profile)
+                .tag(Tabs.profile)
         }
     }
 }

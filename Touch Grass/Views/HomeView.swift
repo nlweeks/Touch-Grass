@@ -10,7 +10,7 @@ import SwiftUI
 struct HomeView: View {
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 3) {
                 CalendarBoxView()
                     .padding()
                 
@@ -19,47 +19,34 @@ struct HomeView: View {
                         .font(.title).bold()
                 }
                 .padding()
+                
+                Spacer()
             }
         }
     }
 }
 
 struct CalendarBoxView: View {
+    let daySymbolStrings = ["s.circle", "m.circle", "t.circle", "w.circle", "t.circle", "f.circle", "s.circle"]
+    
     var body: some View {
         GroupBox {
-            HStack {
-                Spacer()
+            VStack(spacing: 10) {
+                HStack {
+                    Text("Your Social Calendar")
+                        .font(.title).bold()
+                    
+                    Spacer()
+                }
                 
-                Image(systemName: "s.circle")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
-                
-                Image(systemName: "m.circle")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
-                
-                Image(systemName: "t.circle")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
-                
-                Image(systemName: "w.circle")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
-                
-                Image(systemName: "t.circle")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
-                
-                Image(systemName: "f.circle")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
-                
-                Image(systemName: "s.circle")
-                    .font(.title)
-                    .foregroundStyle(.secondary)
-                
-                
-                Spacer()
+                HStack() {
+                    ForEach(0..<7, id: \.self) { i in
+                        Image(systemName: daySymbolStrings[i])
+                            .font(.title)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                }
             }
         }
     }
